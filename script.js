@@ -1,138 +1,106 @@
 /* DARK MODE */
 
 function toggleDark(){
-    document.body.classList.toggle("dark")
+    document.body.classList.toggle("dark");
 }
 
 
-/* TYPING EFFECT */
-
-const text = ["Developer","AI Enthusiast","Problem Solver","Project Builder"];
-let i=0;
-let j=0;
-let currentText="";
-let isDeleting=false;
-
-function type(){
-    currentText = text[i];
-    const el = document.querySelector(".typing");
-    if(el){
-        el.textContent = currentText.substring(0,j);
-    }
-
-    if(!isDeleting && j < currentText.length){
-        j++;
-        setTimeout(type,100);
-    }
-    else if(isDeleting && j>0){
-        j--;
-        setTimeout(type,50);
-    }
-    else{
-        isDeleting = !isDeleting;
-        if(!isDeleting){
-            i = (i+1) % text.length;
-        }
-        setTimeout(type,800);
-    }
-}
-type();
-
-
-
-/* ===== SCROLL EVENTS ===== */
+/* ===== SELECTORS ===== */
 
 const sections = document.querySelectorAll("section");
 const navLinks = document.querySelectorAll(".nav-item");
+const hamburger = document.querySelector(".hamburger");
+const navMenu = document.querySelector(".nav-links");
 
-window.addEventListener("scroll", ()=>{
 
-    /* SCROLL REVEAL */
-    sections.forEach(sec=>{
-        let top = sec.getBoundingClientRect().top;
-        if(top < window.innerHeight - 100){
-            sec.classList.add("reveal","active");
-        }
-    });
+/* ===== SCROLL REVEAL + ACTIVE NAVBAR ===== */
 
-    /* ACTIVE NAVBAR */
+window.addEventListener("scroll", () => {
+
     let current = "";
 
-    sections.forEach(section=>{
-        const sectionTop = section.offsetTop - 150;
+    sections.forEach(section => {
+        const top = section.getBoundingClientRect().top;
 
-        if(window.scrollY >= sectionTop){
+        if (top < window.innerHeight - 100) {
+            section.classList.add("reveal", "active");
+        }
+
+        const sectionTop = section.offsetTop - 150;
+        if (window.scrollY >= sectionTop) {
             current = section.getAttribute("id");
         }
     });
 
-    navLinks.forEach(link=>{
+    navLinks.forEach(link => {
         link.classList.remove("active");
-        if(link.getAttribute("href") === "#" + current){
+        if (link.getAttribute("href") === "#" + current) {
             link.classList.add("active");
         }
     });
 
 });
 
-document.querySelectorAll(".skill-fill").forEach(bar=>{
-let barTop = bar.getBoundingClientRect().top;
 
-if(barTop < window.innerHeight - 50){
-bar.style.width = bar.dataset.width;
-}
-});
+/* ===== SKILL BAR ANIMATION ===== */
 
-/* HAMBURGER MENU */
+function animateSkills(){
+    document.querySelectorAll(".skill-fill").forEach(bar => {
+        const barTop = bar.getBoundingClientRect().top;
 
-const hamburger = document.querySelector(".hamburger");
-const navMenu = document.querySelector(".nav-links");
-
-
-
-document.querySelectorAll(".nav-item").forEach(link=>{
-link.addEventListener("click",()=>{
-navMenu.classList.remove("active");
-});
-});
-
-
-hamburger.addEventListener("click",()=>{
-navMenu.classList.toggle("active");
-document.body.classList.toggle("menu-open");
-
-if(navMenu.classList.contains("active")){
-hamburger.textContent="✕";
-}else{
-hamburger.textContent="☰";
-}
-});
-
-window.addEventListener("DOMContentLoaded", function(){
-
-const modal = document.getElementById("certModal");
-const modalImg = document.getElementById("modalImg");
-const closeModal = document.getElementById("closeModal");
-
-document.querySelectorAll(".zoom-cert").forEach(function(img){
-
-    img.addEventListener("click", function(){
-
-        modal.style.display = "flex";
-        modalImg.src = this.src;
-
+        if (barTop < window.innerHeight - 50) {
+            bar.style.width = bar.dataset.width;
+        }
     });
+}
 
+window.addEventListener("load", animateSkills);
+window.addEventListener("scroll", animateSkills);
+
+
+/* ===== HAMBURGER MENU ===== */
+
+document.querySelectorAll(".nav-item").forEach(link => {
+    link.addEventListener("click", () => {
+        navMenu.classList.remove("active");
+        document.body.classList.remove("menu-open");
+        hamburger.textContent = "☰";
+    });
 });
 
-closeModal.addEventListener("click", function(){
-    modal.style.display = "none";
-});
+hamburger.addEventListener("click", () => {
+    navMenu.classList.toggle("active");
+    document.body.classList.toggle("menu-open");
 
-modal.addEventListener("click", function(e){
-    if(e.target !== modalImg){
-        modal.style.display = "none";
+    if (navMenu.classList.contains("active")) {
+        hamburger.textContent = "✕";
+    } else {
+        hamburger.textContent = "☰";
     }
 });
 
+
+/* ===== CERTIFICATE MODAL ===== */
+
+window.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("certModal");
+    const modalImg = document.getElementById("modalImg");
+    const closeModal = document.getElementById("closeModal");
+
+    document.querySelectorAll(".zoom-cert").forEach(img => {
+        img.addEventListener("click", () => {
+            modal.style.display = "flex";
+            modalImg.src = img.src;
+        });
+    });
+
+    closeModal.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    modal.addEventListener("click", (e) => {
+        if (e.target !== modalImg) {
+            modal.style.display = "none";
+        }
+    });
 });
