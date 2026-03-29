@@ -11,7 +11,7 @@ const statusMessage = document.getElementById("statusMessage");
 const messagesContainer = document.getElementById("messagesContainer");
 
 // Change this after deployment
-const API_BASE = "http://localhost:5001";
+const API_BASE = "https://portfolio-backend-luer.onrender.com";
 
 function getToken() {
   return localStorage.getItem("adminToken");

@@ -127,7 +127,7 @@ if (contactForm) {
     formMessage.className = "form-message";
 
     try {
-      const response = await fetch("http://localhost:5001/send-message", {
+      const response = await fetch("https://portfolio-backend-luer.onrender.com/send-message", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
