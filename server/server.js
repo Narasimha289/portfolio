@@ -189,7 +189,7 @@ app.post("/send-message", contactLimiter, async (req, res) => {
     await transporter.sendMail(userMail);
 */
     return res.status(200).json({
-      message: "Message sent successfully and saved to database!"
+      message: "Message sent successfully."
     });
   } catch (error) {
     console.error("Send message error:", error);
