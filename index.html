@@ -503,35 +503,20 @@ Motivated and detail-oriented aspiring developer with hands-on experience in bui
 </section>
 
 <!-- CONTACT -->
-<section id="contact" class="contact-section">
+<section id="contact" class="contact section">
+  <h2 class="section-title">Contact Me</h2>
+  <p class="contact-subtext">Have a project, opportunity, or question? Send me a message.</p>
 
-<h2 class="section-title">Contact Me</h2>
+  <form id="contactForm" class="contact-form">
+    <input type="text" id="name" name="name" placeholder="Your Name" required />
+    <input type="email" id="email" name="email" placeholder="Your Email" required />
+    <input type="text" id="subject" name="subject" placeholder="Subject" required />
+    <textarea id="message" name="message" rows="6" placeholder="Your Message" required></textarea>
 
-<div class="contact-container">
+    <button type="submit" id="submitBtn">Send Message</button>
 
-    <div class="contact-card">
-
-        <div class="input-box">
-            <input type="text" required>
-            <label>Your Name</label>
-        </div>
-
-        <div class="input-box">
-            <input type="email" required>
-            <label>Email Address</label>
-        </div>
-
-        <div class="input-box textarea-box">
-            <textarea required></textarea>
-            <label>Your Message</label>
-        </div>
-
-        <button class="contact-btn">Send Message</button>
-
-    </div>
-
-</div>
-
+    <p id="formMessage" class="form-message"></p>
+  </form>
 </section>
 
 <footer class="footer">

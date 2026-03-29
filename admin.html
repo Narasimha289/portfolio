@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div class="admin-container">
+    <h1>Admin Dashboard</h1>
+    <p class="subtext">Manage contact form messages</p>
+
+    <div class="login-box" id="loginBox">
+      <input type="text" id="username" placeholder="Admin Username" />
+      <input type="password" id="password" placeholder="Admin Password" />
+      <button id="loginBtn">Login</button>
+    </div>
+
+    <div class="toolbar hidden" id="toolbar">
+      <input type="text" id="searchInput" placeholder="Search by name, email, subject, message" />
+      <select id="filterStatus">
+        <option value="all">All Messages</option>
+        <option value="unread">Unread</option>
+        <option value="read">Read</option>
+      </select>
+      <button id="loadMessagesBtn">Refresh</button>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+
+    <p id="statusMessage" class="status-message"></p>
+
+    <div id="messagesContainer" class="messages-container"></div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

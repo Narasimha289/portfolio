@@ -104,3 +104,53 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+
+const contactForm = document.getElementById("contactForm");
+const formMessage = document.getElementById("formMessage");
+const submitBtn = document.getElementById("submitBtn");
+
+if (contactForm) {
+  contactForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const formData = {
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      subject: document.getElementById("subject").value.trim(),
+      message: document.getElementById("message").value.trim(),
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+    formMessage.textContent = "Sending your message...";
+    formMessage.className = "form-message";
+
+    try {
+      const response = await fetch("http://localhost:5001/send-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        formMessage.textContent = result.message || "Message sent successfully!";
+        formMessage.classList.add("success");
+        contactForm.reset();
+      } else {
+        formMessage.textContent = result.message || "Failed to send message.";
+        formMessage.classList.add("error");
+      }
+    } catch (error) {
+      formMessage.textContent = "Server error. Please try again later.";
+      formMessage.classList.add("error");
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Send Message";
+  });
+}
