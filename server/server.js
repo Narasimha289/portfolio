@@ -152,7 +152,7 @@ app.post("/send-message", contactLimiter, async (req, res) => {
 
     await newContact.save();
 
-    const transporter = nodemailer.createTransport({
+  /*  const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
@@ -187,7 +187,7 @@ app.post("/send-message", contactLimiter, async (req, res) => {
 
     await transporter.sendMail(ownerMail);
     await transporter.sendMail(userMail);
-
+*/
     return res.status(200).json({
       message: "Message sent successfully and saved to database!"
     });
