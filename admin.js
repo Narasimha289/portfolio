@@ -9,6 +9,9 @@ const searchInput = document.getElementById("searchInput");
 const filterStatus = document.getElementById("filterStatus");
 const statusMessage = document.getElementById("statusMessage");
 const messagesContainer = document.getElementById("messagesContainer");
+const totalCount = document.getElementById("totalCount");
+const unreadCount = document.getElementById("unreadCount");
+const emptyState = document.getElementById("emptyState");
 
 // Change this after deployment
 const API_BASE = "https://portfolio-backend-luer.onrender.com";
@@ -25,6 +28,24 @@ function clearToken() {
   localStorage.removeItem("adminToken");
 }
 
+function setStatus(message, color = "#007bff") {
+  statusMessage.textContent = message;
+  statusMessage.style.color = color;
+}
+
+function updateStats(messages) {
+  totalCount.textContent = messages.length;
+  unreadCount.textContent = messages.filter((msg) => !msg.isRead).length;
+}
+
+function toggleEmptyState(messages) {
+  if (messages.length === 0) {
+    emptyState.style.display = "block";
+  } else {
+    emptyState.style.display = "none";
+  }
+}
+
 function showDashboard() {
   loginBox.classList.add("hidden");
   toolbar.classList.remove("hidden");
@@ -34,12 +55,14 @@ function showLogin() {
   loginBox.classList.remove("hidden");
   toolbar.classList.add("hidden");
   messagesContainer.innerHTML = "";
+  totalCount.textContent = "0";
+  unreadCount.textContent = "0";
+  emptyState.style.display = "none";
 }
 
 function handleUnauthorized(message = "Session expired. Please login again.") {
   clearToken();
-  statusMessage.textContent = message;
-  statusMessage.style.color = "red";
+  setStatus(message, "red");
   showLogin();
 }
 
@@ -48,13 +71,11 @@ async function login() {
   const password = passwordInput.value.trim();
 
   if (!username || !password) {
-    statusMessage.textContent = "Please enter username and password.";
-    statusMessage.style.color = "red";
+    setStatus("Please enter username and password.", "red");
     return;
   }
 
-  statusMessage.textContent = "Logging in...";
-  statusMessage.style.color = "#007bff";
+  setStatus("Logging in...", "#007bff");
 
   try {
     const response = await fetch(`${API_BASE}/api/admin/login`, {
@@ -68,20 +89,17 @@ async function login() {
     const data = await response.json();
 
     if (!response.ok) {
-      statusMessage.textContent = data.message || "Login failed.";
-      statusMessage.style.color = "red";
+      setStatus(data.message || "Login failed.", "red");
       return;
     }
 
     setToken(data.token);
-    statusMessage.textContent = "Login successful.";
-    statusMessage.style.color = "green";
+    setStatus("Login successful.", "green");
     showDashboard();
-    await loadMessages();
     passwordInput.value = "";
+    await loadMessages();
   } catch (error) {
-    statusMessage.textContent = "Server error during login.";
-    statusMessage.style.color = "red";
+    setStatus("Server error during login.", "red");
   }
 }
 
@@ -96,9 +114,9 @@ async function loadMessages() {
   const search = searchInput.value.trim();
   const status = filterStatus.value;
 
-  statusMessage.textContent = "Loading messages...";
-  statusMessage.style.color = "#007bff";
+  setStatus("Loading messages...", "#007bff");
   messagesContainer.innerHTML = "";
+  emptyState.style.display = "none";
 
   try {
     const response = await fetch(
@@ -119,18 +137,21 @@ async function loadMessages() {
         return;
       }
 
-      statusMessage.textContent = data.message || "Failed to load messages.";
-      statusMessage.style.color = "red";
+      setStatus(data.message || "Failed to load messages.", "red");
+      updateStats([]);
+      toggleEmptyState([]);
       return;
     }
 
-    statusMessage.textContent = `Loaded ${data.length} message(s).`;
-    statusMessage.style.color = "green";
+    updateStats(data);
+    toggleEmptyState(data);
 
     if (data.length === 0) {
-      messagesContainer.innerHTML = "<p>No messages found.</p>";
+      setStatus("No messages found.", "#666");
       return;
     }
+
+    setStatus(`Loaded ${data.length} message(s).`, "green");
 
     data.forEach((msg) => {
       const card = document.createElement("div");
@@ -141,7 +162,12 @@ async function loadMessages() {
         <p><strong>Name:</strong> ${escapeHtml(msg.name)}</p>
         <p><strong>Email:</strong> ${escapeHtml(msg.email)}</p>
         <p><strong>Message:</strong> ${escapeHtml(msg.message)}</p>
-        <p class="message-status"><strong>Status:</strong> ${msg.isRead ? "Read" : "Unread"}</p>
+        <p class="message-status">
+          <strong>Status:</strong>
+          <span class="status-badge ${msg.isRead ? "read" : "unread"}">
+            ${msg.isRead ? "Read" : "Unread"}
+          </span>
+        </p>
         <p class="message-date"><strong>Received:</strong> ${new Date(msg.createdAt).toLocaleString()}</p>
         <div class="card-actions">
           <button class="${msg.isRead ? "unread-btn" : "read-btn"}" data-id="${msg._id}" data-read="${msg.isRead}">
@@ -156,8 +182,9 @@ async function loadMessages() {
 
     attachActionEvents();
   } catch (error) {
-    statusMessage.textContent = "Server error. Could not fetch messages.";
-    statusMessage.style.color = "red";
+    setStatus("Server error. Could not fetch messages.", "red");
+    updateStats([]);
+    toggleEmptyState([]);
   }
 }
 
@@ -250,8 +277,7 @@ loginBtn.addEventListener("click", login);
 
 logoutBtn.addEventListener("click", () => {
   clearToken();
-  statusMessage.textContent = "Logged out successfully.";
-  statusMessage.style.color = "green";
+  setStatus("Logged out successfully.", "green");
   showLogin();
 });
 

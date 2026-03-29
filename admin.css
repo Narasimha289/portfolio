@@ -40,6 +40,15 @@ h1 {
   border-radius: 8px;
   font-size: 15px;
   min-width: 220px;
+  background: #fff;
+  outline: none;
+}
+
+.login-box input:focus,
+.toolbar input:focus,
+.toolbar select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
 }
 
 .login-box button,
@@ -52,6 +61,7 @@ h1 {
   cursor: pointer;
   font-size: 15px;
   font-weight: 600;
+  transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .login-box button:hover,
@@ -59,12 +69,18 @@ h1 {
   background: #0056b3;
 }
 
+.login-box button:active,
+.toolbar button:active,
+.card-actions button:active {
+  transform: scale(0.98);
+}
+
 .logout-btn {
-  background: #dc3545;
+  background: #dc3545 !important;
 }
 
 .logout-btn:hover {
-  background: #b52b3a;
+  background: #b52b3a !important;
 }
 
 .status-message {
@@ -72,17 +88,56 @@ h1 {
   margin-bottom: 20px;
 }
 
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid #0d6efd;
+}
+
+.stat-card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #333;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+}
+
+.empty-state {
+  text-align: center;
+  background: #fff;
+  padding: 24px;
+  border-radius: 14px;
+  margin-top: 20px;
+  color: #666;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
 .messages-container {
   display: grid;
   gap: 16px;
+  margin-top: 18px;
 }
 
 .message-card {
-  background: white;
-  border-radius: 12px;
-  padding: 18px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  border-left: 5px solid #007bff;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid #f39c12;
 }
 
 .message-card.unread {
@@ -95,11 +150,13 @@ h1 {
 
 .message-card h3 {
   margin: 0 0 10px;
+  font-size: 22px;
+  color: #1f2937;
 }
 
 .message-card p {
   margin: 6px 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .message-date,
@@ -107,6 +164,26 @@ h1 {
   font-size: 13px;
   color: #666;
   margin-top: 10px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.status-badge.unread {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.read {
+  background: #d4edda;
+  color: #155724;
 }
 
 .card-actions {
@@ -122,19 +199,54 @@ h1 {
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  color: #fff;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.card-actions button:hover {
+  opacity: 0.9;
 }
 
 .read-btn {
   background: #28a745;
-  color: white;
 }
 
 .unread-btn {
   background: #ff9800;
-  color: white;
 }
 
 .delete-btn {
   background: #dc3545;
-  color: white;
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    margin: 20px auto;
+    padding: 14px;
+  }
+
+  .login-box,
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .login-box input,
+  .toolbar input,
+  .toolbar select,
+  .login-box button,
+  .toolbar button {
+    width: 100%;
+  }
+
+  .message-card {
+    padding: 16px;
+  }
+
+  .message-card h3 {
+    font-size: 20px;
+  }
+
+  .stat-card p {
+    font-size: 24px;
+  }
 }
