@@ -143,6 +143,18 @@ app.post("/send-message", contactLimiter, async (req, res) => {
   }
 
   try {
+    const recentDuplicate = await Contact.findOne({
+      email,
+      subject,
+      message,
+      createdAt: { $gte: new Date(Date.now() - 60 * 1000) }
+    });
+
+    if (recentDuplicate) {
+      return res.status(409).json({
+        message: "You already sent this message recently. Please wait a minute."
+      });
+    }
     const newContact = new Contact({
       name,
       email,
