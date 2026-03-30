@@ -9,9 +9,11 @@ const bcrypt = require("bcryptjs");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const Contact = require("./models/Contact");
+const { Resend } = require("resend");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
@@ -200,6 +202,31 @@ app.post("/send-message", contactLimiter, async (req, res) => {
     await transporter.sendMail(ownerMail);
     await transporter.sendMail(userMail);
 */
+    await resend.emails.send({
+      from: process.env.FROM_EMAIL,
+      to: process.env.OWNER_EMAIL,
+      reply_to: email,
+      subject: `Portfolio Contact: ${subject}`,
+      html: `
+        <h2>New Portfolio Contact Message</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong><br>${message.replace(/\n/g, "<br>")}</p>
+      `
+    });
+
+    await resend.emails.send({
+      from: process.env.FROM_EMAIL,
+      to: email,
+      subject: "Message received successfully",
+      html: `
+        <h2>Thank you for contacting me, ${name}!</h2>
+        <p>Your message has been received successfully.</p>
+        <p>I will get back to you soon.</p>
+      `
+    });
+
     return res.status(200).json({
       message: "Message sent successfully."
     });
