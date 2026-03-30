@@ -166,42 +166,6 @@ app.post("/send-message", contactLimiter, async (req, res) => {
 
     await newContact.save();
 
-  /*  const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    const ownerMail = {
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      replyTo: email,
-      subject: `Portfolio Contact: ${subject}`,
-      html: `
-        <h3>New Contact Form Message</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <p><strong>Message:</strong><br>${message.replace(/\n/g, "<br>")}</p>
-      `
-    };
-
-    const userMail = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Message Received Successfully",
-      html: `
-        <h3>Thank you for contacting me, ${name}!</h3>
-        <p>Your message has been received successfully.</p>
-        <p>I will get back to you soon.</p>
-      `
-    };
-
-    await transporter.sendMail(ownerMail);
-    await transporter.sendMail(userMail);
-*/
     await resend.emails.send({
       from: process.env.FROM_EMAIL,
       to: process.env.OWNER_EMAIL,
