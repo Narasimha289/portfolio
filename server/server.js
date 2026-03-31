@@ -175,7 +175,7 @@ app.post("/send-message", contactLimiter, async (req, res) => {
     });
 
     await newContact.save();
-    const Analytics = require("./models/Analytics");
+    await incrementAnalytics("contact_submissions");
 
     await resend.emails.send({
       from: process.env.FROM_EMAIL,
@@ -275,10 +275,8 @@ app.get("/api/messages", verifyToken, async (req, res) => {
       ];
     }
 
-    if (status === "read") {
-      query.isRead = true;
-    } else if (status === "unread") {
-      query.isRead = false;
+    if (status && status !== "all") {
+      query.status = status;
     }
 
     const messages = await Contact.find(query).sort({ createdAt: -1 });
@@ -292,35 +290,6 @@ app.get("/api/messages", verifyToken, async (req, res) => {
   }
 });
 
-// ---------- Mark read/unread ----------
-app.patch("/api/messages/:id/read", verifyToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const isRead = Boolean(req.body.isRead);
-
-    const updatedMessage = await Contact.findByIdAndUpdate(
-      id,
-      { isRead },
-      { new: true }
-    );
-
-    if (!updatedMessage) {
-      return res.status(404).json({
-        message: "Message not found"
-      });
-    }
-
-    return res.status(200).json({
-      message: "Message updated successfully",
-      updatedMessage
-    });
-  } catch (error) {
-    console.error("Update read status error:", error);
-    return res.status(500).json({
-      message: "Failed to update message status"
-    });
-  }
-});
 
 // ---------- Delete message ----------
 app.delete("/api/messages/:id", verifyToken, async (req, res) => {

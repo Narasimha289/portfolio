@@ -20,6 +20,10 @@ const filterStatus = document.getElementById("filterStatus");
 
 let token = localStorage.getItem("adminToken") || "";
 
+function getToken() {
+  return localStorage.getItem("adminToken") || "";
+}
+
 /* ===== LOGIN ===== */
 loginBtn.addEventListener("click", async () => {
   const username = usernameInput.value.trim();
@@ -120,60 +124,59 @@ async function loadAnalytics() {
 /* ===== RENDER MESSAGES ===== */
 function renderMessages(messages) {
   messagesContainer.innerHTML = "";
+  statusMessage.textContent = "";
 
-  // ===== FILTER + SEARCH =====
   const searchText = searchInput.value.toLowerCase();
-  const statusFilter = filterStatus.value;
+  const selectedStatus = filterStatus.value;
 
   const filtered = messages.filter((msg) => {
-    const matchSearch =
-      msg.name.toLowerCase().includes(searchText) ||
-      msg.email.toLowerCase().includes(searchText) ||
-      msg.subject.toLowerCase().includes(searchText) ||
-      msg.message.toLowerCase().includes(searchText);
+    const status = msg.status || (msg.isRead ? "read" : "new");
 
-    const matchStatus =
-      statusFilter === "all" ||
-      (statusFilter === "read" && msg.isRead) ||
-      (statusFilter === "unread" && !msg.isRead);
+    const matchesSearch =
+      (msg.name || "").toLowerCase().includes(searchText) ||
+      (msg.email || "").toLowerCase().includes(searchText) ||
+      (msg.subject || "").toLowerCase().includes(searchText) ||
+      (msg.message || "").toLowerCase().includes(searchText);
 
-    return matchSearch && matchStatus;
+    const matchesStatus =
+      selectedStatus === "all" || status === selectedStatus;
+
+    return matchesSearch && matchesStatus;
   });
 
-  // ===== STATS =====
   totalCountEl.textContent = messages.length;
-  unreadCountEl.textContent = messages.filter(m => !m.isRead).length;
+  unreadCountEl.textContent = messages.filter((msg) => {
+    const status = msg.status || (msg.isRead ? "read" : "new");
+    return status === "new";
+  }).length;
 
-  // ===== EMPTY STATE =====
   if (filtered.length === 0) {
     emptyState.style.display = "block";
-    statusMessage.textContent = "";
     return;
   } else {
     emptyState.style.display = "none";
   }
 
-  statusMessage.textContent = "";
-
-  // ===== RENDER CARDS =====
   filtered.forEach((msg) => {
+    const status = msg.status || (msg.isRead ? "read" : "new");
+
     const card = document.createElement("div");
     card.className = "message-card";
 
     card.innerHTML = `
-      <h3>${msg.subject}</h3>
-      <p><strong>Name:</strong> ${msg.name}</p>
-      <p><strong>Email:</strong> ${msg.email}</p>
-      <p><strong>Message:</strong> ${msg.message}</p>
-      
+      <h3>${msg.subject || "No Subject"}</h3>
+      <p><strong>Name:</strong> ${msg.name || "-"}</p>
+      <p><strong>Email:</strong> ${msg.email || "-"}</p>
+      <p><strong>Message:</strong> ${msg.message || "-"}</p>
+
       <p>
-        <span class="status-chip ${msg.status}">
-          ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
+        <span class="status-chip ${status}">
+          ${status.charAt(0).toUpperCase() + status.slice(1)}
         </span>
       </p>
 
       <p class="message-date">
-        ${new Date(msg.createdAt).toLocaleString()}
+        ${msg.createdAt ? new Date(msg.createdAt).toLocaleString() : "-"}
       </p>
 
       <div class="card-actions">
@@ -192,6 +195,7 @@ function renderMessages(messages) {
 /* ===== ACTIONS ===== */
 function attachActions() {
   const token = getToken();
+  
   document.querySelectorAll(".status-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const id = btn.dataset.id;
@@ -229,18 +233,29 @@ function attachActions() {
       // ✅ CONFIRMATION (NEW FEATURE)
       if (!confirm("Are you sure you want to delete this message?")) return;
 
-      await fetch(`${API_BASE}/api/messages/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      try {
+        const response = await fetch(`${API_BASE}/api/messages/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
-      loadMessages();
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.message || "Failed to delete message.");
+          return;
+        }
+
+        loadMessages();
+        loadAnalytics();
+      } catch (error) {
+        alert("Server error while deleting message.");
+      }
     });
   });
 }
-
 exportCsvBtn.addEventListener("click", async () => {
   const token = getToken();
 
