@@ -183,11 +183,13 @@ app.post("/send-message", contactLimiter, async (req, res) => {
     await resend.emails.send({
       from: process.env.FROM_EMAIL,
       to: email,
-      subject: "Message received successfully",
+      subject: "Thanks for reaching out!",
       html: `
         <h2>Thank you for contacting me, ${name}!</h2>
         <p>Your message has been received successfully.</p>
-        <p>I will get back to you soon.</p>
+        <p>Thank you for taking the time to connect with me through my portfolio website.</p>
+        <p>I truly appreciate your interest in my profile and opportunities shared.</p>
+        <p>Best regards,<br>Narasimha Reddy</p>
       `
     });
 
