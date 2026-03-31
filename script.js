@@ -9,6 +9,20 @@ const navLinks = document.querySelectorAll(".nav-item");
 const hamburger = document.querySelector(".hamburger");
 const navMenu = document.querySelector(".nav-links");
 
+async function trackAnalytics(key) {
+  try {
+    await fetch("https://portfolio-backend-luer.onrender.com/api/analytics/track", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ key })
+    });
+  } catch (error) {
+    console.error("Analytics tracking failed:", error);
+  }
+}
+
 /* ===== SCROLL REVEAL + ACTIVE NAVBAR ===== */
 window.addEventListener("scroll", () => {
   let current = "";
@@ -200,3 +214,34 @@ function scrollCertificates(direction) {
         behavior: "smooth"
     });
 }
+
+const resumeBtn = document.getElementById("resumeBtn");
+if (resumeBtn) {
+  resumeBtn.addEventListener("click", () => {
+    trackAnalytics("resume_downloads");
+  });
+}
+
+const linkedinBtn = document.getElementById("linkedinBtn");
+if (linkedinBtn) {
+  linkedinBtn.addEventListener("click", () => {
+    trackAnalytics("linkedin_clicks");
+  });
+}
+
+const githubBtn = document.getElementById("githubBtn");
+if (githubBtn) {
+  githubBtn.addEventListener("click", () => {
+    trackAnalytics("github_clicks");
+  });
+}
+
+document.querySelectorAll(".project-link").forEach((link) => {
+  link.addEventListener("click", () => {
+    trackAnalytics("project_clicks");
+  });
+});
+
+window.addEventListener("load", () => {
+  trackAnalytics("portfolio_visits");
+});

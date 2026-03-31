@@ -13,6 +13,7 @@ const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const exportCsvBtn = document.getElementById("exportCsvBtn");
 
 const searchInput = document.getElementById("searchInput");
 const filterStatus = document.getElementById("filterStatus");
@@ -63,6 +64,7 @@ function showDashboard() {
   loginBox.style.display = "none";
   toolbar.classList.remove("hidden");
   loadMessages();
+  loadAnalytics();
 }
 
 /* ===== LOAD MESSAGES ===== */
@@ -87,6 +89,31 @@ async function loadMessages() {
     renderMessages(data);
   } catch {
     statusMessage.textContent = "Server error";
+  }
+}
+
+async function loadAnalytics() {
+  const token = getToken();
+
+  try {
+    const response = await fetch(`${API_BASE}/api/analytics`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) return;
+
+    document.getElementById("visitsCount").textContent = data.portfolio_visits || 0;
+    document.getElementById("submissionsCount").textContent = data.contact_submissions || 0;
+    document.getElementById("resumeCount").textContent = data.resume_downloads || 0;
+    document.getElementById("linkedinCount").textContent = data.linkedin_clicks || 0;
+    document.getElementById("githubCount").textContent = data.github_clicks || 0;
+    document.getElementById("projectsCount").textContent = data.project_clicks || 0;
+  } catch (error) {
+    console.error("Analytics load error:", error);
   }
 }
 
@@ -139,22 +166,20 @@ function renderMessages(messages) {
       <p><strong>Email:</strong> ${msg.email}</p>
       <p><strong>Message:</strong> ${msg.message}</p>
       
-      <p class="status-badge ${msg.isRead ? "read" : "unread"}">
-        ${msg.isRead ? "Read" : "Unread"}
+      <p>
+        <span class="status-chip ${msg.status}">
+          ${msg.status.charAt(0).toUpperCase() + msg.status.slice(1)}
+        </span>
       </p>
 
       <p class="message-date">
         ${new Date(msg.createdAt).toLocaleString()}
       </p>
 
-      <div class="actions">
-        <button class="read-btn" data-id="${msg._id}" data-read="${msg.isRead}">
-          ${msg.isRead ? "Mark Unread" : "Mark Read"}
-        </button>
-
-        <button class="delete-btn" data-id="${msg._id}">
-          Delete
-        </button>
+      <div class="card-actions">
+        <button class="status-btn" data-id="${msg._id}" data-status="read">Mark Read</button>
+        <button class="status-btn" data-id="${msg._id}" data-status="replied">Mark Replied</button>
+        <button class="delete-btn" data-id="${msg._id}">Delete</button>
       </div>
     `;
 
@@ -166,21 +191,34 @@ function renderMessages(messages) {
 
 /* ===== ACTIONS ===== */
 function attachActions() {
-  document.querySelectorAll(".read-btn").forEach((btn) => {
+  const token = getToken();
+  document.querySelectorAll(".status-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const id = btn.dataset.id;
-      const current = btn.dataset.read === "true";
+      const status = btn.dataset.status;
 
-      await fetch(`${API_BASE}/api/messages/${id}/read`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ isRead: !current })
-      });
+      try {
+        const response = await fetch(`${API_BASE}/api/messages/${id}/status`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ status })
+        });
 
-      loadMessages();
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.message || "Failed to update status.");
+          return;
+        }
+
+        loadMessages();
+        loadAnalytics();
+      } catch (error) {
+        alert("Server error while updating status.");
+      }
     });
   });
 
@@ -202,6 +240,37 @@ function attachActions() {
     });
   });
 }
+
+exportCsvBtn.addEventListener("click", async () => {
+  const token = getToken();
+
+  try {
+    const response = await fetch(`${API_BASE}/api/messages/export`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      alert("Failed to export CSV.");
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "messages.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    alert("Export failed.");
+  }
+});
 
 /* ===== FILTER EVENTS ===== */
 searchInput.addEventListener("input", loadMessages);

@@ -10,6 +10,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const Contact = require("./models/Contact");
 const { Resend } = require("resend");
+const Analytics = require("./models/Analytics");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -113,6 +114,14 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+const incrementAnalytics = async (key) => {
+  await Analytics.findOneAndUpdate(
+    { key },
+    { $inc: { count: 1 } },
+    { upsert: true, new: true }
+  );
+};
+
 const sanitizeInput = (value) => {
   return String(value || "").trim();
 };
@@ -161,10 +170,12 @@ app.post("/send-message", contactLimiter, async (req, res) => {
       name,
       email,
       subject,
-      message
+      message,
+      status: "new"
     });
 
     await newContact.save();
+    const Analytics = require("./models/Analytics");
 
     await resend.emails.send({
       from: process.env.FROM_EMAIL,
@@ -332,6 +343,113 @@ app.delete("/api/messages/:id", verifyToken, async (req, res) => {
     return res.status(500).json({
       message: "Failed to delete message"
     });
+  }
+});
+
+app.patch("/api/messages/:id/status", verifyToken, async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!["new", "read", "replied"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const updatedMessage = await Contact.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedMessage) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    res.status(200).json({
+      message: "Status updated successfully",
+      updatedMessage
+    });
+  } catch (error) {
+    console.error("Update status error:", error);
+    res.status(500).json({ message: "Failed to update status" });
+  }
+});
+
+app.get("/api/messages/export", verifyToken, async (req, res) => {
+  try {
+    const messages = await Contact.find().sort({ createdAt: -1 });
+
+    const csvRows = [
+      ["Name", "Email", "Subject", "Message", "Status", "Created At"]
+    ];
+
+    messages.forEach((msg) => {
+      csvRows.push([
+        `"${(msg.name || "").replace(/"/g, '""')}"`,
+        `"${(msg.email || "").replace(/"/g, '""')}"`,
+        `"${(msg.subject || "").replace(/"/g, '""')}"`,
+        `"${(msg.message || "").replace(/"/g, '""')}"`,
+        `"${msg.status}"`,
+        `"${new Date(msg.createdAt).toLocaleString()}"`
+      ]);
+    });
+
+    const csvContent = csvRows.map((row) => row.join(",")).join("\n");
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=messages.csv");
+    res.status(200).send(csvContent);
+  } catch (error) {
+    console.error("Export CSV error:", error);
+    res.status(500).json({ message: "Failed to export messages" });
+  }
+});
+
+app.post("/api/analytics/track", async (req, res) => {
+  try {
+    const { key } = req.body;
+
+    const allowedKeys = [
+      "portfolio_visits",
+      "resume_downloads",
+      "linkedin_clicks",
+      "github_clicks",
+      "project_clicks"
+    ];
+
+    if (!allowedKeys.includes(key)) {
+      return res.status(400).json({ message: "Invalid analytics key" });
+    }
+
+    await incrementAnalytics(key);
+
+    res.status(200).json({ message: "Tracked successfully" });
+  } catch (error) {
+    console.error("Track analytics error:", error);
+    res.status(500).json({ message: "Failed to track analytics" });
+  }
+});
+
+app.get("/api/analytics", verifyToken, async (req, res) => {
+  try {
+    const analytics = await Analytics.find();
+
+    const result = {
+      portfolio_visits: 0,
+      contact_submissions: 0,
+      resume_downloads: 0,
+      linkedin_clicks: 0,
+      github_clicks: 0,
+      project_clicks: 0
+    };
+
+    analytics.forEach((item) => {
+      result[item.key] = item.count;
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Fetch analytics error:", error);
+    res.status(500).json({ message: "Failed to fetch analytics" });
   }
 });
 
