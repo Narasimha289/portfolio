@@ -190,3 +190,13 @@ if (contactForm) {
     }
   });
 }
+
+function scrollCertificates(direction) {
+    const container = document.getElementById("certScroll");
+    const scrollAmount = 350;
+
+    container.scrollBy({
+        left: direction * scrollAmount,
+        behavior: "smooth"
+    });
+}

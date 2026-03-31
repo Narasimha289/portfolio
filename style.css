@@ -1299,3 +1299,123 @@ button:disabled {
     transform: translate(-50%, -50%) rotate(360deg);
   }
 }
+
+.cert-section {
+  padding: 60px 20px;
+  overflow: hidden;
+}
+
+.cert-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px;
+}
+
+.cert-scroll-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.cert-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.cert-scroll-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cert-container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 20px;
+  width: max-content;
+}
+
+.cert-card {
+  flex: 0 0 320px;
+  width: 320px;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cert-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.16);
+}
+
+.cert-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.cert-info {
+  padding: 16px;
+}
+
+.cert-info h3 {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.cert-info p {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.cert-info a {
+  display: inline-block;
+  text-decoration: none;
+  color: #fff;
+  background: #007bff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.cert-info a:hover {
+  background: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .cert-card {
+    flex: 0 0 280px;
+    width: 280px;
+  }
+
+  .cert-img {
+    height: 190px;
+  }
+}
+.cert-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.scroll-btn {
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 50%;
+  background: #007bff;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+
+.scroll-btn:hover {
+  transform: scale(1.08);
+  background: #0056b3;
+}
